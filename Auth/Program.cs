@@ -1,6 +1,7 @@
 using Auth.Data.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using static DashboardController;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,17 +18,16 @@ builder.Services.AddDbContext<AppIdentityDbContext>(Options =>
 });
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<AppIdentityDbContext>();  
-
+    .AddEntityFrameworkStores<AppIdentityDbContext>();
+builder.Services.AddTransient<IEmailService, SendGridEmailService>();
 builder.Services.AddAuthentication();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app.UseHttpsRedirection();
 
@@ -48,9 +48,9 @@ try
 
     var UserManager = Services.GetRequiredService<UserManager<IdentityUser>>();
     await AppIdentityDbContextSeed.SeedUserAsync(UserManager);
-   
+
 }
-catch(Exception ex)
+catch (Exception ex)
 {
     var Logger = LoggerFactory.CreateLogger<Program>();
     Logger.LogError(ex, "An Error During Applying Migration");

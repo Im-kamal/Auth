@@ -1,6 +1,4 @@
-﻿using Auth.Data.Identity;
-using Auth.DTOs;
-using Microsoft.AspNetCore.Http;
+﻿using Auth.DTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +11,7 @@ namespace Auth.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
 
-        public AccountsController(UserManager<IdentityUser> userManager , SignInManager<IdentityUser> signInManager)
+        public AccountsController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
         {
             this._userManager = userManager;
             this._signInManager = signInManager;
@@ -29,14 +27,15 @@ namespace Auth.Controllers
                 Email = model.Email,
                 PhoneNumber = model.PhoneNumber,
             };
-           var Result =   await _userManager.CreateAsync(User,model.Password);
+            var Result = await _userManager.CreateAsync(User, model.Password);
 
-            if (!Result.Succeeded) 
+            if (!Result.Succeeded)
                 return BadRequest();
-            var ReturnedUser = new UserDto 
-            { UserName = User.UserName,
+            var ReturnedUser = new UserDto
+            {
+                UserName = User.UserName,
                 Email = User.Email,
-                Token = "This Will be Token" 
+                Token = "This Will be Token"
             };
 
             return Ok(ReturnedUser);
@@ -47,23 +46,24 @@ namespace Auth.Controllers
         public async Task<ActionResult<UserDto>> Login(LoginDto model)
         {
             var User = await _userManager.FindByEmailAsync(model.Email);
-            if(User is null)
+            if (User is null)
                 return Unauthorized();
-           var Result =  await _signInManager.CheckPasswordSignInAsync(User, model.Password , false);
+            var Result = await _signInManager.CheckPasswordSignInAsync(User, model.Password, false);
 
-            if(!Result.Succeeded)
+            if (!Result.Succeeded)
                 return Unauthorized();
             return Ok(new UserDto()
             {
-                UserName=User.UserName,
-                Email=User.Email,
-                Token= "WillBeToken"
+                UserName = User.UserName,
+                Email = User.Email,
+                Token = "WillBeToken"
             });
 
 
-                    
-            
+
+
 
         }
+
     }
 }
