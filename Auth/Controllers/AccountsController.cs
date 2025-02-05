@@ -1,4 +1,5 @@
 ﻿using Auth.DTOs;
+using Auth.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,11 +11,15 @@ namespace Auth.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly ITokenServices _tokenServices;
 
-        public AccountsController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        public AccountsController(UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager
+            ,ITokenServices tokenServices)
         {
             this._userManager = userManager;
             this._signInManager = signInManager;
+            this._tokenServices = tokenServices;
         }
 
         //Register 
@@ -35,7 +40,7 @@ namespace Auth.Controllers
             {
                 UserName = User.UserName,
                 Email = User.Email,
-                Token = "This Will be Token"
+                Token =await _tokenServices.CreateTokenAsync(User , _userManager)
             };
 
             return Ok(ReturnedUser);
@@ -56,7 +61,8 @@ namespace Auth.Controllers
             {
                 UserName = User.UserName,
                 Email = User.Email,
-                Token = "WillBeToken"
+                Token =await _tokenServices.CreateTokenAsync(User , _userManager)
+
             });
 
 

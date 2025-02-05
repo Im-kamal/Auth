@@ -1,4 +1,6 @@
 using Auth.Data.Identity;
+using Auth.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using static DashboardController;
@@ -17,10 +19,11 @@ builder.Services.AddDbContext<AppIdentityDbContext>(Options =>
     Options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
 });
 
+builder.Services.AddScoped<ITokenServices, TokenServices>();
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppIdentityDbContext>();
 builder.Services.AddTransient<IEmailService, SendGridEmailService>();
-builder.Services.AddAuthentication();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
