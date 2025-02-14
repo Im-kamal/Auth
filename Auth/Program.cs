@@ -1,8 +1,10 @@
+using Auth.Data;
 using Auth.Data.Identity;
 using Auth.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using static DashboardController;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +20,9 @@ builder.Services.AddDbContext<AppIdentityDbContext>(Options =>
 {
     Options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
 });
+builder.Services.AddDbContext<ApplicationDbContext>(options => {
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ApplicationConnection"));
+    });
 
 builder.Services.AddScoped<ITokenServices, TokenServices>();
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
@@ -26,7 +31,8 @@ builder.Services.AddTransient<IEmailService, SendGridEmailService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
+
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -46,11 +52,13 @@ var LoggerFactory = Services.GetRequiredService<ILoggerFactory>();
 try
 {
     var IdentityContext = Services.GetRequiredService<AppIdentityDbContext>();
+    var AppDbContext = Services.GetRequiredService<ApplicationDbContext>();
 
     await IdentityContext.Database.MigrateAsync();
+   
 
     var UserManager = Services.GetRequiredService<UserManager<IdentityUser>>();
-    await AppIdentityDbContextSeed.SeedUserAsync(UserManager);
+    await AppIdentityDbContextSeed.SeedUserAsync(UserManager, AppDbContext);
 
 }
 catch (Exception ex)
